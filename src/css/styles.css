@@ -54,9 +54,9 @@ p{
   transition: transform var(--animation-duration) var(--timing-function);
 }
 
-/* .gallery__item:hover {
+.gallery__item:hover {
   transform: scale(1.03);
-} */
+}
 .info{
   display: flex;
   justify-content: space-evenly;
