@@ -1,88 +1,85 @@
 import './css/styles.css';
 import Notiflix from 'notiflix';
-import fetchCountries from './js/fetchCountries.js';
 
-const DEBOUNCE_DELAY = 300;
-var debounce = require('lodash.debounce');
-let name = 'Ukraine';
+// Описан в документации
+import SimpleLightbox from "simplelightbox";
+// Дополнительный импорт стилей
+import "simplelightbox/dist/simple-lightbox.min.css";
 
-let inputSearch = document.querySelector('#search-box');
-let countryList = document.querySelector('.country-list');
+let lightbox = new SimpleLightbox('.gallery a', {
+  captionsData: 'alt',
+  captionDelay: 250,
+});
 
-inputSearch.addEventListener('input', debounce(onSearching, DEBOUNCE_DELAY));
+const KEY = "32926611-8cada7c2f97f927ebc9aab067"
+const BASE_URL="https://pixabay.com/api/?image_type=photo&orientation=horizontal&safesearch=true"
+
+function fetchPictures(name) {
+  return fetch(`${BASE_URL}&key=${KEY}&q=${name}&per_page=30`).then(response => {
+    if (!response.ok) {
+      Notiflix.Notify.failure('Sorry, there are no images matching your search query. Please try again.');
+    }
+    return response.json();
+  });
+}
+
+let valueSearching = 'cat';
+
+
+
+let inputSearch = document.querySelector('#search-form');
+let gallery = document.querySelector('.gallery');
+
+inputSearch.addEventListener('submit', onSearching);
 
 function onSearching(evt) {
-  name = evt.target.value.trim();
-  countryList.innerHTML = '';
+  evt.preventDefault();
+  // valueSearching = evt.target.elements.searchQuery.value.trim();
 
-  if (!name) {
-    return ;
+  gallery.innerHTML = '';
+
+  if (!valueSearching) {
+    return;
   }
 
-  fetchCountries(name)
+  fetchPictures(valueSearching)
     .then(data => {
-      if (data.length > 10) {
-        Notiflix.Notify.info(
-          'Too many matches found. Please enter a more specific name.'
-        );
-        return;
-      } else {
-        if (data.length > 1 && data.length <= 10) {
-          countryList.innerHTML = createMarkupList(data);
-        } else {
-          countryList.innerHTML = createMarkup(data);
-        }
-      }
+      gallery.innerHTML=createMarkup(data.hits);
     })
     .catch(err => console.log(err));
 }
 
-function createMarkupList(arr) {
-  console.log(arr);
-  return arr
-    .map(
-      ({ name: { official: name }, flags: { svg: flag } }) =>
-        ` <li  >
-        <div class="list_of_countries" >
-          <img class="flag" src="${flag}" alt="${name}" />
-          <p>${name}</p>
-          </div>
-         </li>`
-    )
-    .join('');
-}
-
 function createMarkup(arr) {
-  console.log(arr);
   return arr
     .map(
       ({
-        name: { official: name },
-        flags: { svg: flag },
-        capital,
-        population,
-        languages,
+        webformatURL,
+        largeImageURL,
+        tags,
+        likes,
+        views,
+        comments,
+        downloads,
       }) =>
-        ` <li>
-                  <div class="list_of_countries" >
-                    <img class="flag" src="${flag}" alt="${name}" />
-                    <h1>${name}</h1>
-                  </div>
-                  <p> <b>Capital</b>: ${capital}</p>
-                  <p> <b> Population: </b>${population}</p>
-                  <p> <b> Languages:</b> ${Object.values(languages).join(
-                    ', '
-                  )}</p>
-            </li>`
-    )
-    .join('');
+        `<a class="gallery__item" href="${largeImageURL}">
+                       
+<div class="photo-card">
+  <img class="gallery__image" src="${webformatURL}" alt="${tags}" loading="lazy" />
+  <div class="info">
+    <p class="info-item">
+      <b>Likes</b>${likes}
+    </p>
+    <p class="info-item">
+      <b>Views</b>${views}
+    </p>
+    <p class="info-item">
+      <b>Comments</b>${comments}
+    </p>
+    <p class="info-item">
+      <b>Downloads</b>${downloads}
+    </p>
+  </div>
+</div>  
+</a>`).join('');
+ 
 }
-
-Notiflix.Notify.init({
-  position: 'center-top',
-  width: '300px',
-  distance: '10px',
-  opacity: 1,
-  rtl: false,
-  timeout: 1000,
-});
