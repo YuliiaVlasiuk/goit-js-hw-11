@@ -10,14 +10,17 @@ const KEY = "32926611-8cada7c2f97f927ebc9aab067"
 const BASE_URL="https://pixabay.com/api/?image_type=photo&orientation=horizontal&safesearch=true"
 
 let valueSearching = 'cat';
+let page;
+
 
 let inputSearch = document.querySelector('#search-form');
 let gallery = document.querySelector('.gallery');
 let buttonSearch = document.querySelector('.load-more');
 
 inputSearch.addEventListener('submit', onSearching);
-let page;
+
 function onSearching(evt) {
+  buttonSearch.hidden=true;
   evt.preventDefault();
   page=1;
   valueSearching = evt.target.elements.searchQuery.value.trim();
@@ -33,6 +36,7 @@ function onSearching(evt) {
   
     const arrayOfPictures = createMarkup(data.hits);
     gallery.insertAdjacentHTML('beforeend', arrayOfPictures);
+    buttonSearch.hidden=false;
     })
     .catch(err => console.log(err));
 }
@@ -92,6 +96,7 @@ function fetchPictures(name,page) {
       Notiflix.Notify.failure('Sorry, there are no images matching your search query. Please try again.');
     }
     return response.json();
+    page+=1;
     
   });
 }
