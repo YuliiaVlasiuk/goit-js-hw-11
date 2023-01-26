@@ -28,7 +28,7 @@ function onSearching(evt) {
   buttonSearch.style.display = 'none';
   evt.preventDefault();
   page = 1;
-  valueSearching = evt.target.elements.searchQuery.value.trim();
+  valueSearching = evt.currentTarget.elements.searchQuery.value.trim();
 
   gallery.innerHTML = '';
 
