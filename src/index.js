@@ -5,7 +5,7 @@ import 'simplelightbox/dist/simple-lightbox.min.css';
 import axios from 'axios';
 
 let page;
-let valueSearching="";
+let valueSearching='';
 let totalCounts;
 const count = 40;
 const KEY = '32926611-8cada7c2f97f927ebc9aab067';
