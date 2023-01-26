@@ -5,6 +5,7 @@ import 'simplelightbox/dist/simple-lightbox.min.css';
 import axios from 'axios';
 
 let page;
+let valueSearching="";
 let totalCounts;
 const count = 40;
 const KEY = '32926611-8cada7c2f97f927ebc9aab067';
@@ -28,29 +29,29 @@ function onSearching(evt) {
   buttonSearch.style.display = 'none';
   evt.preventDefault();
   page = 1;
-  valueSearching = evt.currentTarget.elements.searchQuery.value.trim();
-console.log(valueSearching);
-  // gallery.innerHTML = '';
+  valueSearching = evt.target.elements.searchQuery.value.trim();
 
-  // if (!valueSearching) {
-  //   Notiflix.Notify.failure('Please, enter a search value!');
-  //   return;
-  // }
+  gallery.innerHTML = '';
 
-  // fetchPictures(valueSearching, page)
-  //   .then(data => {
-  //     totalCounts = data.totalHits;
-  //     if (totalCounts === 0) {
-  //       Notiflix.Notify.failure(
-  //         'Sorry, there are no images matching your search query. Please try again.'
-  //       );
-  //       return;
-  //     }
-  //     const arrayOfPictures = createMarkup(data.hits);
-  //     gallery.insertAdjacentHTML('beforeend', arrayOfPictures);
-  //     buttonSearch.style.display = 'block';
-  //   })
-  //   .catch(err => console.log(err));
+  if (!valueSearching) {
+    Notiflix.Notify.failure('Please, enter a search value!');
+    return;
+  }
+
+  fetchPictures(valueSearching, page)
+    .then(data => {
+      totalCounts = data.totalHits;
+      if (totalCounts === 0) {
+        Notiflix.Notify.failure(
+          'Sorry, there are no images matching your search query. Please try again.'
+        );
+        return;
+      }
+      const arrayOfPictures = createMarkup(data.hits);
+      gallery.insertAdjacentHTML('beforeend', arrayOfPictures);
+      buttonSearch.style.display = 'block';
+    })
+    .catch(err => console.log(err));
 }
 
 function createMarkup(arr) {
