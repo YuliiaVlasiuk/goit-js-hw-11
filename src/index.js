@@ -7,6 +7,7 @@ import axios from 'axios';
 let page;
 let valueSearching='';
 let totalCounts;
+
 const count = 40;
 const KEY = '32926611-8cada7c2f97f927ebc9aab067';
 const BASE_URL =
@@ -121,6 +122,7 @@ async function fetchPictures(name, page) {
   );
   return await response.data;
 }
+
 
 Notiflix.Notify.init({
   position: 'right-top',
