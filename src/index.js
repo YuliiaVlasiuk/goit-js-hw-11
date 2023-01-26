@@ -5,7 +5,7 @@ import 'simplelightbox/dist/simple-lightbox.min.css';
 import axios from 'axios';
 
 let page;
-let valueSearching='';
+let valueSearching = '';
 let totalCounts;
 
 const count = 40;
@@ -19,14 +19,14 @@ let lightbox = new SimpleLightbox('.gallery a', {
   captionDelay: 250,
 });
 
-let inputSearch = document.querySelector('#search-form');
+let formSearch = document.querySelector('#search-form');
 let gallery = document.querySelector('.gallery');
 let buttonSearch = document.querySelector('.load-more');
 buttonSearch.style.display = 'none';
 
-inputSearch.addEventListener('submit', onSearching);
+formSearch.addEventListener('submit', onSearching);
 
-function onSearching(evt) {
+async function onSearching(evt) {
   buttonSearch.style.display = 'none';
   evt.preventDefault();
   page = 1;
@@ -38,22 +38,23 @@ function onSearching(evt) {
     Notiflix.Notify.failure('Please, enter a search value!');
     return;
   }
+  try {
+    const response = await fetchPictures(valueSearching, page);
 
-  fetchPictures(valueSearching, page)
-    .then(data => {
-      totalCounts = data.totalHits;
-      if (totalCounts === 0) {
-        Notiflix.Notify.failure(
-          'Sorry, there are no images matching your search query. Please try again.'
-        );
-        return;
-      }
-      const arrayOfPictures = createMarkup(data.hits);
-      gallery.insertAdjacentHTML('beforeend', arrayOfPictures);
-      lightbox.refresh();
-      buttonSearch.style.display = 'block';
-    })
-    .catch(err => console.log(err));
+    totalCounts = response.totalHits;
+    if (totalCounts === 0) {
+      Notiflix.Notify.failure(
+        'Sorry, there are no images matching your search query. Please try again.'
+      );
+      return;
+    }
+    const arrayOfPictures = createMarkup(response.hits);
+    gallery.insertAdjacentHTML('beforeend', arrayOfPictures);
+    lightbox.refresh();
+    buttonSearch.style.display = 'block';
+  } catch (err) {
+    console.log(err);
+  }
 }
 
 function createMarkup(arr) {
@@ -93,19 +94,20 @@ function createMarkup(arr) {
 
 buttonSearch.addEventListener('click', onLoadMore);
 
-function onLoadMore() {
+async function onLoadMore() {
   page += 1;
-  fetchPictures(valueSearching, page)
-    .then(data => {
-      const arrayOfPictures = createMarkup(data.hits);
-      gallery.insertAdjacentHTML('beforeend', arrayOfPictures);
-    })
-    .catch(err => {
-      console.log(err.message);
-      Notiflix.Notify.failure(
-        'Sorry, there are no images matching your search query. Please try again.'
-      );
-    });
+
+  try {
+    const response = await fetchPictures(valueSearching, page);
+    const arrayOfPictures = createMarkup(response.hits);
+    gallery.insertAdjacentHTML('beforeend', arrayOfPictures);
+    lightbox.refresh();
+  } catch (err) {
+    console.log(err.message);
+    Notiflix.Notify.failure(
+      'Sorry, there are no images matching your search query. Please try again.'
+    );
+  }
 
   if (page * count > totalCounts) {
     Notiflix.Notify.failure(
@@ -122,7 +124,6 @@ async function fetchPictures(name, page) {
   );
   return await response.data;
 }
-
 
 Notiflix.Notify.init({
   position: 'right-top',
