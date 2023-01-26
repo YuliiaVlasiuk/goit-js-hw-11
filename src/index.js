@@ -29,28 +29,28 @@ function onSearching(evt) {
   evt.preventDefault();
   page = 1;
   valueSearching = evt.currentTarget.elements.searchQuery.value.trim();
+console.log(valueSearching);
+  // gallery.innerHTML = '';
 
-  gallery.innerHTML = '';
+  // if (!valueSearching) {
+  //   Notiflix.Notify.failure('Please, enter a search value!');
+  //   return;
+  // }
 
-  if (!valueSearching) {
-    Notiflix.Notify.failure('Please, enter a search value!');
-    return;
-  }
-
-  fetchPictures(valueSearching, page)
-    .then(data => {
-      totalCounts = data.totalHits;
-      if (totalCounts === 0) {
-        Notiflix.Notify.failure(
-          'Sorry, there are no images matching your search query. Please try again.'
-        );
-        return;
-      }
-      const arrayOfPictures = createMarkup(data.hits);
-      gallery.insertAdjacentHTML('beforeend', arrayOfPictures);
-      buttonSearch.style.display = 'block';
-    })
-    .catch(err => console.log(err));
+  // fetchPictures(valueSearching, page)
+  //   .then(data => {
+  //     totalCounts = data.totalHits;
+  //     if (totalCounts === 0) {
+  //       Notiflix.Notify.failure(
+  //         'Sorry, there are no images matching your search query. Please try again.'
+  //       );
+  //       return;
+  //     }
+  //     const arrayOfPictures = createMarkup(data.hits);
+  //     gallery.insertAdjacentHTML('beforeend', arrayOfPictures);
+  //     buttonSearch.style.display = 'block';
+  //   })
+  //   .catch(err => console.log(err));
 }
 
 function createMarkup(arr) {
