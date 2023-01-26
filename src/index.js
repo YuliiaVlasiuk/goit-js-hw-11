@@ -1,42 +1,54 @@
 import './css/styles.css';
 import Notiflix from 'notiflix';
-import SimpleLightbox from "simplelightbox";
-import "simplelightbox/dist/simple-lightbox.min.css";
+import SimpleLightbox from 'simplelightbox';
+import 'simplelightbox/dist/simple-lightbox.min.css';
+import axios from 'axios';
 
-let lightbox = new SimpleLightbox('.gallery a');
-
-
-const KEY = "32926611-8cada7c2f97f927ebc9aab067"
-const BASE_URL="https://pixabay.com/api/?image_type=photo&orientation=horizontal&safesearch=true"
-
-let valueSearching = 'cat';
 let page;
+let totalCounts;
+const count = 40;
+const KEY = '32926611-8cada7c2f97f927ebc9aab067';
+const BASE_URL =
+  'https://pixabay.com/api/?image_type=photo&orientation=horizontal&safesearch=true';
 
+let lightbox = new SimpleLightbox('.gallery a', {
+  captionsData: 'alt',
+  captionsPositions: 'bottom',
+  captionDelay: 250,
+});
 
 let inputSearch = document.querySelector('#search-form');
 let gallery = document.querySelector('.gallery');
 let buttonSearch = document.querySelector('.load-more');
+buttonSearch.style.display = 'none';
 
 inputSearch.addEventListener('submit', onSearching);
 
 function onSearching(evt) {
-  buttonSearch.hidden=true;
+  buttonSearch.style.display = 'none';
   evt.preventDefault();
-  page=1;
+  page = 1;
   valueSearching = evt.target.elements.searchQuery.value.trim();
 
   gallery.innerHTML = '';
 
   if (!valueSearching) {
+    Notiflix.Notify.failure('Please, enter a search value!');
     return;
   }
 
-  fetchPictures(valueSearching,page)
+  fetchPictures(valueSearching, page)
     .then(data => {
-  
-    const arrayOfPictures = createMarkup(data.hits);
-    gallery.insertAdjacentHTML('beforeend', arrayOfPictures);
-    buttonSearch.hidden=false;
+      totalCounts = data.totalHits;
+      if (totalCounts === 0) {
+        Notiflix.Notify.failure(
+          'Sorry, there are no images matching your search query. Please try again.'
+        );
+        return;
+      }
+      const arrayOfPictures = createMarkup(data.hits);
+      gallery.insertAdjacentHTML('beforeend', arrayOfPictures);
+      buttonSearch.style.display = 'block';
     })
     .catch(err => console.log(err));
 }
@@ -53,7 +65,7 @@ function createMarkup(arr) {
         comments,
         downloads,
       }) =>
-`<a class="gallery__item" href="${largeImageURL}">
+        `<a class="gallery__item" href="${largeImageURL}">
 <div class="photo-card">
   <img class="gallery__image" src="${webformatURL}" alt="${tags}" loading="lazy" />
   <div class="info">
@@ -71,32 +83,48 @@ function createMarkup(arr) {
     </p>
   </div>
 </div>  
-</a>`).join('');
- }
+</a>`
+    )
+    .join('');
+}
 
- buttonSearch.addEventListener('click', onLoadMore)
+buttonSearch.addEventListener('click', onLoadMore);
 
- function onLoadMore(){
-  page+=1;
-  fetchPictures(valueSearching,page)
+function onLoadMore() {
+  page += 1;
+  fetchPictures(valueSearching, page)
     .then(data => {
-  
-    const arrayOfPictures = createMarkup(data.hits);
-    gallery.insertAdjacentHTML('beforeend', arrayOfPictures);
+      const arrayOfPictures = createMarkup(data.hits);
+      gallery.insertAdjacentHTML('beforeend', arrayOfPictures);
     })
-    .catch(err => console.log(err));
+    .catch(err => {
+      console.log(err.message);
+      Notiflix.Notify.failure(
+        'Sorry, there are no images matching your search query. Please try again.'
+      );
+    });
+
+  if (page * count > totalCounts) {
+    Notiflix.Notify.failure(
+      "We're sorry, but you've reached the end of search results."
+    );
+    buttonSearch.style.display = 'none';
+    return;
+  }
 }
 
-
- 
-
-function fetchPictures(name,page) {
-  return fetch(`${BASE_URL}&key=${KEY}&q=${name}&per_page=40&page=${page}`).then(response => {
-    if (!response.ok) {
-      Notiflix.Notify.failure('Sorry, there are no images matching your search query. Please try again.');
-    }
-    return response.json();
-    page+=1;
-    
-  });
+async function fetchPictures(name, page) {
+  const response = await axios.get(
+    `${BASE_URL}&key=${KEY}&q=${name}&per_page=${count}&page=${page}`
+  );
+  return await response.data;
 }
+
+Notiflix.Notify.init({
+  position: 'right-top',
+  width: '300px',
+  distance: '10px',
+  opacity: 1,
+  rtl: false,
+  timeout: 1000,
+});
