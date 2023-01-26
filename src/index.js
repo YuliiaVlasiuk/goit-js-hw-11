@@ -49,6 +49,7 @@ function onSearching(evt) {
       }
       const arrayOfPictures = createMarkup(data.hits);
       gallery.insertAdjacentHTML('beforeend', arrayOfPictures);
+      lightbox.refresh();
       buttonSearch.style.display = 'block';
     })
     .catch(err => console.log(err));
